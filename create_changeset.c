@@ -25,10 +25,12 @@ char *insert_additional_data = "INSERT INTO animals(name) VALUES ('Cow');"
 
 int create_master_db();
 int duplicate_master_db();
+int capture_changes_to_changeset();
 
 int main(void) {
   create_master_db();
   duplicate_master_db();
+  capture_changes_to_changeset();
 }
 
 int create_master_db() {
@@ -74,4 +76,29 @@ int duplicate_master_db() {
   fclose(slave);
 
   return 0;
+}
+
+int capture_changes_to_changeset() {
+  sqlite3 *db;
+  sqlite3_session *session;
+  char *err_msg;
+  void *buffer;
+  int size;
+
+  int rc = sqlite3_open("master.db", &db);
+  if (rc != SQLITE_OK) {
+    fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
+    sqlite3_close(db);
+    return 1;
+  }
+
+  rc = sqlite3session_create(db, "main", &session);
+  rc = sqlite3session_attach(session, "animals");
+  rc = sqlite3_exec(db, insert_additional_data, 0, 0, &err_msg);
+  rc = sqlite3session_changeset(session, &size, &buffer);
+
+  // save changeset file
+  FILE *changeset = fopen("changes.session", "w");
+  fwrite(buffer, 1, size, changeset);
+  fclose(changeset);
 }

@@ -61,7 +61,7 @@ int main(void) {
   }
 
   buffer = load_binary_file("changes.session", &size);
-  printf("apllying changeset... (size: %d bytes)\n", size);
+  printf("Applying changeset... (size: %d bytes)\n", size);
   sqlite3changeset_apply(db, size, buffer, 0, on_conflict, db);
   sqlite3_close(db);
 

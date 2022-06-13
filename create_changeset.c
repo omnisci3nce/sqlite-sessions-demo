@@ -15,6 +15,7 @@
 #include "sqlite/sqlite3.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include "macro.h"
 
 // All the queries we will perform
 char *setup_initial_data = "CREATE TABLE animals(id INTEGER PRIMARY KEY, name TEXT);"
@@ -35,7 +36,6 @@ int main(void) {
 
 int create_master_db() {
   sqlite3 *db;
-  char *err_msg;
 
   int rc = sqlite3_open("master.db", &db);
   if (rc != SQLITE_OK) {
@@ -44,15 +44,7 @@ int create_master_db() {
     return 1;
   }
 
-  rc = sqlite3_exec(db, setup_initial_data, 0, 0, &err_msg);
-
-  if (rc != SQLITE_OK) {
-    fprintf(stderr, "SQL error: %s\n", err_msg);
-    sqlite3_free(err_msg);
-    sqlite3_close(db);
-    return 1;
-  }
-
+  SQL_CALL_AND_CHECK(db, sqlite3_exec(db, setup_initial_data, 0, 0, 0));
   sqlite3_close(db);
   return 0;
 }
@@ -81,7 +73,6 @@ int duplicate_master_db() {
 int capture_changes_to_changeset() {
   sqlite3 *db;
   sqlite3_session *session;
-  char *err_msg;
   void *buffer;
   int size;
 
@@ -92,10 +83,10 @@ int capture_changes_to_changeset() {
     return 1;
   }
 
-  rc = sqlite3session_create(db, "main", &session);
-  rc = sqlite3session_attach(session, "animals");
-  rc = sqlite3_exec(db, insert_additional_data, 0, 0, &err_msg);
-  rc = sqlite3session_changeset(session, &size, &buffer);
+  SQL_CALL_AND_CHECK(db, sqlite3session_create(db, "main", &session));
+  SQL_CALL_AND_CHECK(db, sqlite3session_attach(session, "animals"));
+  SQL_CALL_AND_CHECK(db, sqlite3_exec(db, insert_additional_data, 0, 0, 0));
+  SQL_CALL_AND_CHECK(db, sqlite3session_changeset(session, &size, &buffer));
 
   // save changeset file
   FILE *changeset = fopen("changes.session", "w");

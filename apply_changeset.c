@@ -1,15 +1,5 @@
 /**
- * Overall Flow:
-
-  1. Open master.db
-  2. Create table
-  3. Insert demo data
-  4. Copy to new slave.db
-  5. Create a **session**
-  6. Insert new data
-  7. Save session changeset
-  8. Close db
-
+ * Apply changes.session to slave.db
 */
 
 #include "sqlite/sqlite3.h"

@@ -15,5 +15,6 @@ https://sqlite.org/sessionintro.html - Delta db updates using "changesets"
 
 #### Dependencies
 
-- A C compiler - on debian-based linux repos it should be `sudo apt install build-essential`
+- GCC compiler - on debian-based linux repos it should be `sudo apt install build-essential`
 - Make `sudo apt install make`
+- SQLite `sudo apt install sqlite3`
